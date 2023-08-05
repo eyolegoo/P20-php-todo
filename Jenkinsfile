@@ -5,7 +5,7 @@ pipeline{
         TAG = "${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
         max = 20
         random_num = "${Math.abs(new Random().nextInt(max+1))}"
-//         docker_password = credentials('dockerhub_password')
+        docker_password = credentials('dockerhub_password')
     }
 
     stages{
