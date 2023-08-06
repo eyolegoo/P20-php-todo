@@ -27,13 +27,15 @@ pipeline{
         stage('Building application ') {
             steps {
                 script {
-                    
-                    sh 'echo $DOCKERHUB_CREDENTIALS_PSW | sudo docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'                		
-	                    echo 'Login Completed'   
-                    sh " docker build -t teaguejobs/php-todo:${env.TAG} ."
+
+                    withCredentials([string(credentialsId: 'dockerhub-pwd', variable: 'dockerhubpwd')]) {
+    
+                   sh 'docker login -u teaguejobs -p ${dockerhubpwd}' 
+                   sh " docker build -t teaguejobs/php-todo:${env.TAG} ."
                 }
             }
         }
+    }
 
         stage('Creating docker container') {
             steps {
@@ -47,7 +49,7 @@ pipeline{
             steps {
                 script {
                     sh "sleep 60"
-                    sh "curl -I 3.86.253.112:8000"
+                    sh "curl -I 52.91.29.79:8000"
                 }
             }
         }
