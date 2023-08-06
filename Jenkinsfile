@@ -5,7 +5,7 @@ pipeline{
         TAG = "${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
         max = 20
         random_num = "${Math.abs(new Random().nextInt(max+1))}"
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-pwd1')
+        PASSWORD = credentials('dockerhub-pwd1')
        
     }
 
@@ -20,7 +20,7 @@ pipeline{
 
         stage('Checkout Git') {
             steps {
-                git branch: 'main', credentialsId: '648507ac-1beb-428a-bd01-f75a8b9f6e6a', url: 'https://github.com/teaguejobs/php-todo-proj20'
+                git branch: 'main', credentialsId: 'github', url: 'https://github.com/teaguejobs/php-todo-proj20'
             }
         }
 
