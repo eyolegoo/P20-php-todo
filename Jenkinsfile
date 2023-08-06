@@ -24,7 +24,7 @@ pipeline{
             }
         }
 
-        stage('Building application ') {
+        stage('Building application') {
             steps {
                 script {
 
