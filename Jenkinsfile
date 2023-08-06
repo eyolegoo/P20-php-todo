@@ -28,7 +28,7 @@ pipeline{
             steps {
                 script {
 
-                    withCredentials([string(credentialsId: 'dockerhub-pwd', variable: 'PASSWORD')]) {
+                    withCredentials([string(credentialsId: 'dockerhub-pwd1', variable: 'PASSWORD')]) {
     
                    sh " docker login -u teaguejobs -p ${env.PASSWORD}"
                    sh " docker build -t teaguejobs/php-todo:${env.TAG} ."
