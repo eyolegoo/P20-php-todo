@@ -6,7 +6,7 @@ pipeline{
         max = 20
         random_num = "${Math.abs(new Random().nextInt(max+1))}"
         // docker_password = credentials('dockerhub_password')
-        PASSWORD = credentials('dockerhub')
+        
     }
 
     stages{
