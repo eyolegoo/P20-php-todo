@@ -1,5 +1,5 @@
 pipeline {
-    agent { Dockerfile true }
+    agent  Dockerfile true 
     stages {
         stage('SCM Checkout') {
             steps {
