@@ -5,7 +5,7 @@ pipeline{
         TAG = "${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
         max = 20
         random_num = "${Math.abs(new Random().nextInt(max+1))}"
-        DOCKERHUB_CREDENTIALS= credentials('dockerhub-pwd') 
+        PASSWORD = credentials('dockerhub-pwd') 
 }
 
     stages{
@@ -27,7 +27,7 @@ pipeline{
             steps {
                 script {
 
-                     sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'   
+                     sh " docker login -u teaguejobs -p ${env.PASSWORD}"   
                      sh " docker build -t teaguejobs/php-todo:${env.TAG} ."
                 }
             }
