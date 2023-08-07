@@ -19,7 +19,7 @@ pipeline{
 
         stage('Checkout Git') {
             steps {
-                git credentialsId: 'github', url: 'https://github.com/teaguejobs/php-todo-proj20'
+                git branch: 'main', credentialsId: 'github', url: 'https://github.com/teaguejobs/php-todo-proj20'
             }
         }
 
