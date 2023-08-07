@@ -1,36 +1,80 @@
-pipeline {
-    agent  any
-    stages {
-        stage('SCM Checkout') {
+pipeline{
+    agent any
+
+    environment {
+        TAG = "${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
+        max = 20
+        random_num = "${Math.abs(new Random().nextInt(max+1))}"
+//         docker_password = credentials('dockerhub_password')
+    }
+
+    stages{
+        stage("Workspace Cleanup") {
+            steps {
+                dir("${WORKSPACE}") {
+                    deleteDir()
+                }
+            }
+        }
+
+        stage('Checkout Git') {
+            steps {
+                git credentialsId: 'github', url: 'https://github.com/teaguejobs/php-todo-proj20'
+            }
+        }
+
+        stage('Building application ') {
             steps {
                 script {
-                    checkout([
-                        $class: 'GitSCM',
-                        branches: [[name: '*/master']],
-                        userRemoteConfigs: [[url: 'https://github.com/teaguejobs/php-todo-proj20']]
-                    ])
+                    
+                    sh " docker login -u teaguejobs -p ${env.PASSWORD}"
+                    sh " docker build -t teaguejobs/php-todo:${env.TAG} ."
                 }
             }
         }
-        stage('Build docker image') {
+
+        stage('Creating docker container') {
             steps {
-                sh 'docker build -t teaguejobs/php-todo:$BUILD_NUMBER .'
+                script {
+                    sh " docker run -d --name todo-app-${env.random_num} -p 8000:8000 teaguejobs/php-todo:${env.TAG}"
+                }
             }
         }
-        stage('Login to Docker Hub and Push Image') {
-            steps{
-                withCredentials([usernamePassword(credentialsId: 'docker-hub-teague',
-                                                  passwordVariable: 'DOCKERHUB_PSW',
-                                                  usernameVariable: 'DOCKERHUB_USR')]) {
-                    sh 'echo $DOCKERHUB_PSW | docker login -u $DOCKERHUB_USR --password-stdin'
-                    sh 'docker push teaguejobs/php-todo:$BUILD_NUMBER'
+
+        stage("Smoke Test") {
+            steps {
+                script {
+                    sh "sleep 60"
+                    sh "curl -I 3.87.8.29:8000"
+                }
+            }
+        }
+
+        stage("Publish to Registry") {
+            steps {
+                script {
+                    sh " docker push teaguejobs/php-todo:${env.TAG}"
+                }
+            }
+        }
+
+        stage ('Clean Up') {
+            steps {
+                script {
+                    sh " docker stop todo-app-${env.random_num}"
+                    sh " docker rm todo-app-${env.random_num}"
+                    sh " docker rmi teaguejobs/php-todo:${env.TAG}"
+                }
+            }
+        }
+
+        stage ('logout Docker') {
+            steps {
+                script {
+                    sh " docker logout"
                 }
             }
         }
     }
-    post {
-        always {
-            sh 'docker logout'
-        }
-    }
+   
 }
