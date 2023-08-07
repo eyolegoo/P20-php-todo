@@ -6,7 +6,7 @@ pipeline {
                 script {
                     checkout([
                         $class: 'GitSCM',
-                        branches: [[name: '*/main']],
+                        branches: [[name: '*/master']],
                         userRemoteConfigs: [[url: 'https://github.com/teaguejobs/php-todo-proj20']]
                     ])
                 }
