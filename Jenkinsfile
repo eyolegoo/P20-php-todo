@@ -1,81 +1,36 @@
-pipeline{
+pipeline {
     agent any
-
-    environment {
-        TAG = "${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
-        max = 20
-        random_num = "${Math.abs(new Random().nextInt(max+1))}"
-        PASSWORD = credentials('dockerhub-pwd') 
-}
-
-    stages{
-        stage("Workspace Cleanup") {
+    stages {
+        stage('SCM Checkout') {
             steps {
-                dir("${WORKSPACE}") {
-                    deleteDir()
+                script {
+                    checkout([
+                        $class: 'GitSCM',
+                        branches: [[name: '*/main']],
+                        userRemoteConfigs: [[url: 'https://github.com/teaguejobs/php-todo-proj20']]
+                    ])
                 }
             }
         }
-
-        stage('Checkout Git') {
+        stage('Build docker image') {
             steps {
-                git branch: 'main', credentialsId: 'github', url: 'https://github.com/teaguejobs/php-todo-proj20'
+                sh 'docker build -t teaguejobs/php-todo:$BUILD_NUMBER .'
             }
         }
-
-        stage('Building application') {
-            steps {
-                script {
-
-                     sh " docker login -u teaguejobs -p ${env.PASSWORD}"   
-                     sh " docker build -t teaguejobs/php-todo:${env.TAG} ."
-                }
-            }
-        }
-    
-
-        stage('Creating docker container') {
-            steps {
-                script {
-                    sh " docker run -d --name todo-app-${env.random_num} -p 8000:8000 teaguejobs/php-todo:${env.TAG}"
-                }
-            }
-        }
-
-        stage("Smoke Test") {
-            steps {
-                script {
-                    sh "sleep 60"
-                    sh "curl -I 52.91.29.79:8000"
-                }
-            }
-        }
-
-        stage("Publish to Registry") {
-            steps {
-                script {
-                    sh " docker push teaguejobs/php-todo:${env.TAG}"
-                }
-            }
-        }
-
-        stage ('Clean Up') {
-            steps {
-                script {
-                    sh " docker stop todo-app-${env.random_num}"
-                    sh " docker rm todo-app-${env.random_num}"
-                    sh " docker rmi teaguejobs/php-todo:${env.TAG}"
-                }
-            }
-        }
-
-        stage ('logout Docker') {
-            steps {
-                script {
-                    sh " docker logout"
+        stage('Login to Docker Hub and Push Image') {
+            steps{
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-teague',
+                                                  passwordVariable: 'DOCKERHUB_PSW',
+                                                  usernameVariable: 'DOCKERHUB_USR')]) {
+                    sh 'echo $DOCKERHUB_PSW | docker login -u $DOCKERHUB_USR --password-stdin'
+                    sh 'docker push teaguejobs/php-todo:$BUILD_NUMBER'
                 }
             }
         }
     }
-   
+    post {
+        always {
+            sh 'docker logout'
+        }
+    }
 }
