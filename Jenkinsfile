@@ -27,6 +27,14 @@ pipeline {
                 }
             }
         }
+        stage("Smoke Test") {
+            steps {
+                script {
+                    sh "sleep 60"
+                    sh "curl -I 44.203.191.92:8000"
+                }
+            }
+        }
     }
     post {
         always {
