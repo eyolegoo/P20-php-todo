@@ -31,7 +31,7 @@
 //             steps {
 //                 script {
 //                     sh "sleep 60"
-//                     sh "curl -localhost:8085"
+//                     sh "curl -I 54.226.244.83:8000"
 //                 }
 //             }
 //         }
@@ -79,7 +79,6 @@ pipeline{
             steps {
                 script {
                     
-                    sh " docker login -u eyolego -p "
                     sh "  docker build -t todo-app ."
                 }
             }
