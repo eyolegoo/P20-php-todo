@@ -14,7 +14,14 @@ pipeline {
         }
         stage('Build docker image') {
             steps {
-                sh 'docker build -t eyolego/lego-todo-app:$BUILD_NUMBER .'
+                sh 'docker build -t todo-app:$BUILD_NUMBER .'
+            }
+        }
+        stage('Creating docker container') {
+            steps {
+                script {
+                    sh " docker run --name lego-todo-app --network tooling_app-network -p 8080:8000 -it -d todo-app"
+                }
             }
         }
         stage('Login to Docker Hub and Push Image') {
@@ -87,7 +94,7 @@ pipeline {
 //         stage('Creating docker container') {
 //             steps {
 //                 script {
-//                     sh " docker run --name lego-todo-app --network tooling_app-network  -p 8080:8000 -it -d todo-app"
+//                     sh " docker run --name lego-todo-app --network tooling_app-network -p 8080:8000 -it -d todo-app"
 //                 }
 //             }
 //         }
